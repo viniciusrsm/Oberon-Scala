@@ -41,7 +41,24 @@ class RiscvCodeGenTest extends AnyFunSuite {
 
       assert(generatedCode == baseCode)
     }
-      
+    
+    test("jump operation") {
+      TACodeGenerator.reset
+      val t0 = new Temporary(IntegerType, 8, true)
+      val t1 = new Temporary(IntegerType, 9, true)
+      val l1 = LabelGenerator.generateLabel.replace(":","")
+      val ops = List(
+        AddOp(Constant("1", IntegerType), Constant("6", IntegerType), t0, ""),
+        Jump(l1, ""),
+        AddOp(Constant("4", IntegerType), Constant("5", IntegerType), t0, ""),
+        NOp(l1)
+      )
+
+      val generatedCode = RiscvCodeGenerator.generateCode(ops)
+      //val baseCode = Resources.getContent(s"riscvCode/sub_div_mul.asm")  
+      println(generatedCode)
+      //assert(generatedCode == baseCode)
+    }
     
     
 }

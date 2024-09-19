@@ -62,7 +62,16 @@ object RiscvCodeGenerator extends CodeGenerator[List[TAC], String] {
             case OrOp(s1, s2, dest, label) =>   generateBinExp(s1, s2, dest, "or")
             case SLTOp(s1, s2, dest, label) =>  generateBinExp(s1, s2, dest, "slt")
             case SLTUOp(s1, s2, dest, label) => generateBinExp(s1, s2, dest, "sltu")
+            case NOp(label) => s"$label:\n"
+            case Jump(destLabel, label) => s"j $destLabel\n"
+            case JumpFalse(s1, destLabel, label) => s"beq $s1,x0,$destLabel"
+            case JumpTrue(s1, destLabel, label) => s"bne $s1,x0,$destLabel"
+            case LTEJump(s1, s2, destLabel, label) => s"ble $s1,$s2,$destLabel"
+            case LTJump(s1, s2, destLabel, label) => s"blt $s1,$s2,$destLabel"
+            case GTEJump(s1, s2, destLabel, label) => s"bge $s1,$s2,$destLabel"
+            case GTJump(s1, s2, destLabel, label) => s"bgt $s1,$s2,$destLabel"
+            case EqJump(s1, s2, destLabel, label) => s"beq $s1,$s2,$destLabel"
+            case NeqJump(s1, s2, destLabel, label) => s"bne $s1,$s2,$destLabel"
         }
     }
-
 }
