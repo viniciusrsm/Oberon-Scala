@@ -20,8 +20,6 @@ class RiscvCodeGenTest extends AnyFunSuite {
 
       val generatedCode = RiscvCodeGenerator.generateCode(ops)
       val baseCode = Resources.getContent(s"riscvCode/add_rem_slt.asm")
-      println(generatedCode)
-      println(baseCode)
 
       assert(generatedCode == baseCode)
     }
@@ -55,9 +53,8 @@ class RiscvCodeGenTest extends AnyFunSuite {
       )
 
       val generatedCode = RiscvCodeGenerator.generateCode(ops)
-      //val baseCode = Resources.getContent(s"riscvCode/sub_div_mul.asm")  
-      println(generatedCode)
-      //assert(generatedCode == baseCode)
+      val baseCode = Resources.getContent(s"riscvCode/jump.asm")  
+      assert(generatedCode == baseCode)
     }
     
     

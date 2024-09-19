@@ -10,9 +10,6 @@ object RiscvCodeGenerator extends CodeGenerator[List[TAC], String] {
     val indentSize: Int = 4
     val twoLines: Doc = line * 2
 
-    val regMap: collection.mutable.Map[Int, Int] = (8 to 31).map(key => key -> 0).to(collection.mutable.Map)
-    val teste: Map[Int, String] = Map.apply(0 -> "0", 1 -> "0")
-
     override def generateCode(module: List[TAC]): String = {
         val mainHeader =
             text(".data") / text(".text") + twoLines
@@ -26,7 +23,6 @@ object RiscvCodeGenerator extends CodeGenerator[List[TAC], String] {
     def addrToReg(addr: Address): String = {
         addr match {
             case Temporary(t, num, manual) => {
-                regMap(num) = 1
                 s"x$num"
             }
         }
