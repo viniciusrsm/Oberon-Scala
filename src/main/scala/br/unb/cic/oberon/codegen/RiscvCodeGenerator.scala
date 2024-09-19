@@ -28,7 +28,7 @@ object RiscvCodeGenerator extends CodeGenerator[List[TAC], String] {
         }
     }
 
-    def generateBinExp(addrLeft: Address, addrRight: Address, addrDest: Address, instr: String): String = {
+    def generateBinExp(addrLeft: Address, addrRight: Address, addrDest: Temporary, instr: String): String = {
         (addrLeft, addrRight) match {
             case (Constant(valueLeft, _), Constant(valueRight, _)) => 
                 s"li x5,${valueLeft}\n" +
@@ -49,25 +49,30 @@ object RiscvCodeGenerator extends CodeGenerator[List[TAC], String] {
 
     def generateOps(op: TAC): String = {
         op match {
-            case AddOp(s1, s2, dest, label) =>  generateBinExp(s1, s2, dest, "add")
-            case SubOp(s1, s2, dest, label) =>  generateBinExp(s1, s2, dest, "sub")
-            case MulOp(s1, s2, dest, label) =>  generateBinExp(s1, s2, dest, "mul")
-            case DivOp(s1, s2, dest, label) =>  generateBinExp(s1, s2, dest, "div")
-            case RemOp(s1, s2, dest, label) =>  generateBinExp(s1, s2, dest, "rem")
-            case AndOp(s1, s2, dest, label) =>  generateBinExp(s1, s2, dest, "and")
-            case OrOp(s1, s2, dest, label) =>   generateBinExp(s1, s2, dest, "or")
-            case SLTOp(s1, s2, dest, label) =>  generateBinExp(s1, s2, dest, "slt")
-            case SLTUOp(s1, s2, dest, label) => generateBinExp(s1, s2, dest, "sltu")
+            case AddOp(s1, s2, dest:Temporary, label) =>  generateBinExp(s1, s2, dest, "add")
+            case SubOp(s1, s2, dest:Temporary, label) =>  generateBinExp(s1, s2, dest, "sub")
+            case MulOp(s1, s2, dest:Temporary, label) =>  generateBinExp(s1, s2, dest, "mul")
+            case DivOp(s1, s2, dest:Temporary, label) =>  generateBinExp(s1, s2, dest, "div")
+            case RemOp(s1, s2, dest:Temporary, label) =>  generateBinExp(s1, s2, dest, "rem")
+            case AndOp(s1, s2, dest:Temporary, label) =>  generateBinExp(s1, s2, dest, "and")
+            case OrOp(s1, s2, dest:Temporary, label) =>   generateBinExp(s1, s2, dest, "or")
+            case SLTOp(s1, s2, dest:Temporary, label) =>  generateBinExp(s1, s2, dest, "slt")
+            case SLTUOp(s1, s2, dest:Temporary, label) => generateBinExp(s1, s2, dest, "sltu")
             case NOp(label) => s"$label:\n"
             case Jump(destLabel, label) => s"j $destLabel\n"
-            case JumpFalse(s1, destLabel, label) => s"beq $s1,x0,$destLabel"
-            case JumpTrue(s1, destLabel, label) => s"bne $s1,x0,$destLabel"
-            case LTEJump(s1, s2, destLabel, label) => s"ble $s1,$s2,$destLabel"
-            case LTJump(s1, s2, destLabel, label) => s"blt $s1,$s2,$destLabel"
-            case GTEJump(s1, s2, destLabel, label) => s"bge $s1,$s2,$destLabel"
-            case GTJump(s1, s2, destLabel, label) => s"bgt $s1,$s2,$destLabel"
-            case EqJump(s1, s2, destLabel, label) => s"beq $s1,$s2,$destLabel"
-            case NeqJump(s1, s2, destLabel, label) => s"bne $s1,$s2,$destLabel"
+            case JumpFalse(s1:Temporary, destLabel, label) => s"beq x${s1.num},x0,$destLabel\n"
+            case JumpTrue(s1:Temporary, destLabel, label) => s"bne x${s1.num},x0,$destLabel\n"
+            case LTEJump(s1:Temporary, s2:Temporary, destLabel, label) => s"ble x${s1.num},x${s2.num},$destLabel\n"
+            case LTJump(s1:Temporary, s2:Temporary, destLabel, label) => s"blt x${s1.num},x${s2.num},$destLabel\n"
+            case GTEJump(s1:Temporary, s2:Temporary, destLabel, label) => s"bge x${s1.num},x${s2.num},$destLabel\n"
+            case GTJump(s1:Temporary, s2:Temporary, destLabel, label) => s"bgt x${s1.num},x${s2.num},$destLabel\n"
+            case EqJump(s1:Temporary, s2:Temporary, destLabel, label) => s"beq x${s1.num},x${s2.num},$destLabel\n"
+            case NeqJump(s1:Temporary, s2:Temporary, destLabel, label) => s"bne x${s1.num},x${s2.num},$destLabel\n"
+            case NegOp(s1:Temporary, dest:Temporary, label) => s"neg x${dest.num},x${s1.num}\n"
+            case NotOp(s1:Temporary, dest:Temporary, label) => s"not x${dest.num},x${s1.num}\n"
+            case MoveOp(s1:Temporary, dest:Temporary, label) => s"mv x${dest.num},x${s1.num}\n"
+            case _ => throw new Exception("invalid operation")
+
         }
     }
 }

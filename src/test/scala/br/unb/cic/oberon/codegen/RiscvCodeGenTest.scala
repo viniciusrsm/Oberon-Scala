@@ -9,9 +9,9 @@ import org.scalatest.funsuite.AnyFunSuite
 class RiscvCodeGenTest extends AnyFunSuite {
     test("add + rem + slt") {
       TACodeGenerator.reset
-      val t0 = new Temporary(IntegerType, 11, true)
-      val t1 = new Temporary(IntegerType, 12, true)
-      val t2 = new Temporary(IntegerType, 13, true)
+      val t0 = new Temporary(IntegerType, 8, true)
+      val t1 = new Temporary(IntegerType, 9, true)
+      val t2 = new Temporary(IntegerType, 10, true)
       val ops = List(
         AddOp(Constant("9", IntegerType), Constant("4", IntegerType), t0, ""),
         RemOp(t0, Constant("3", IntegerType), t1, ""),
@@ -54,6 +54,115 @@ class RiscvCodeGenTest extends AnyFunSuite {
 
       val generatedCode = RiscvCodeGenerator.generateCode(ops)
       val baseCode = Resources.getContent(s"riscvCode/jump.asm")  
+      assert(generatedCode == baseCode)
+    }
+
+    test("and + or + slt") {
+      TACodeGenerator.reset
+      val t0 = new Temporary(IntegerType, 8, true)
+      val t1 = new Temporary(IntegerType, 9, true)
+      val t2 = new Temporary(IntegerType, 10, true)
+      val ops = List(
+        AndOp(Constant("5", IntegerType), Constant("-7", IntegerType), t0, ""),
+        OrOp(Constant("5", IntegerType), Constant("-7", IntegerType), t1, ""),
+        SLTUOp(t0, t1, t2, ""),
+      )
+
+      val generatedCode = RiscvCodeGenerator.generateCode(ops)
+      val baseCode = Resources.getContent(s"riscvCode/and_or_sltu.asm")  
+      assert(generatedCode == baseCode)
+    }
+
+    test("jumptrue + jumpfalse") {
+      TACodeGenerator.reset
+      val t0 = new Temporary(IntegerType, 8, true)
+      val t1 = new Temporary(IntegerType, 9, true)
+      val t2 = new Temporary(IntegerType, 10, true)
+      val zero = new Temporary(IntegerType, 0, true)
+      val l0 = LabelGenerator.generateLabel.replace(":","")
+      val l1 = LabelGenerator.generateLabel.replace(":","")
+
+      val ops = List(
+        AddOp(Constant("2", IntegerType), zero, t0, ""),
+        JumpFalse(t0, l0, ""),
+        AddOp(Constant("6", IntegerType), zero, t1, ""),
+        JumpTrue(t0, l1, ""),
+        NOp(l0),
+        AndOp(t0, t1, t2, ""),
+        NOp(l1)
+      )
+
+      val generatedCode = RiscvCodeGenerator.generateCode(ops)
+      val baseCode = Resources.getContent(s"riscvCode/jumptrue_jumpfalse.asm")  
+      assert(generatedCode == baseCode)
+    }
+
+    test("lte + lt + gte jumps") {
+      TACodeGenerator.reset
+      val t0 = new Temporary(IntegerType, 8, true)
+      val t1 = new Temporary(IntegerType, 9, true)
+      val t2 = new Temporary(IntegerType, 10, true)
+      val zero = new Temporary(IntegerType, 0, true)
+      val l0 = LabelGenerator.generateLabel.replace(":","")
+      val l1 = LabelGenerator.generateLabel.replace(":","")
+      val l2 = LabelGenerator.generateLabel.replace(":","")
+
+      val ops = List(
+        AddOp(Constant("1", IntegerType), zero, t0, ""),
+        LTEJump(t0, zero, l0, ""),
+        LTJump(t0, zero, l1, ""),
+        GTEJump(t0, zero, l2, ""),
+        NOp(l0),
+        NOp(l1),  
+        NOp(l2),
+      )
+
+      val generatedCode = RiscvCodeGenerator.generateCode(ops)
+      val baseCode = Resources.getContent(s"riscvCode/lte_lt_gte_jumps.asm")  
+      assert(generatedCode == baseCode)
+    }
+
+    test("gt + eq + neq jumps") {
+      TACodeGenerator.reset
+      val t0 = new Temporary(IntegerType, 8, true)
+      val t1 = new Temporary(IntegerType, 9, true)
+      val t2 = new Temporary(IntegerType, 10, true)
+      val zero = new Temporary(IntegerType, 0, true)
+      val l0 = LabelGenerator.generateLabel.replace(":","")
+      val l1 = LabelGenerator.generateLabel.replace(":","")
+      val l2 = LabelGenerator.generateLabel.replace(":","")
+
+      val ops = List(
+        AddOp(Constant("1", IntegerType), zero, t0, ""),
+        GTJump(t0, zero, l0, ""),
+        EqJump(t0, zero, l1, ""),
+        NeqJump(t0, zero, l2, ""),
+        NOp(l0),
+        NOp(l1),  
+        NOp(l2),
+      )
+
+      val generatedCode = RiscvCodeGenerator.generateCode(ops)
+      val baseCode = Resources.getContent(s"riscvCode/gt_eq_neq_jumps.asm")  
+      assert(generatedCode == baseCode)
+    }
+    
+    test("not + neg + move") {
+      TACodeGenerator.reset
+      val t0 = new Temporary(IntegerType, 8, true)
+      val t1 = new Temporary(IntegerType, 9, true)
+      val t2 = new Temporary(IntegerType, 10, true)
+      val zero = new Temporary(IntegerType, 0, true)
+
+      val ops = List(
+        AddOp(zero, zero, t0, ""),
+        NotOp(t0, t1, ""),
+        NegOp(t1, t2, ""),
+        MoveOp(t2, t0, "")
+      )
+
+      val generatedCode = RiscvCodeGenerator.generateCode(ops)
+      val baseCode = Resources.getContent(s"riscvCode/not_neg_mv.asm")  
       assert(generatedCode == baseCode)
     }
     
